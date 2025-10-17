@@ -1,47 +1,49 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const path = require('path');
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { connectDB, sequelize } from "./database/index.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
+import { Project } from "./models/Project.js";
+import { Contact } from "./models/Contact.js";
 
+dotenv.config();
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3001;
 
+// Configuração para __dirname no ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Middlewares
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
-// Endpoint para receber mensagens do formulário
-app.post('/contato', (req, res) => {
-    const { nome, email, mensagem } = req.body;
+// Rotas da API
+app.use("/projects", projectRoutes);
+app.use("/contact", contactRoutes);
 
-    if (!nome || !email || !mensagem) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
-    }
+// Health check
+app.get("/health", (_, res) => res.json({ ok: true }));
 
-    // Ler o arquivo de mensagens existentes
-    const dbPath = path.join(__dirname, 'db.json');
-    let mensagens = [];
-    if (fs.existsSync(dbPath)) {
-        mensagens = JSON.parse(fs.readFileSync(dbPath));
-    }
+// Servir React build
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-    // Adicionar a nova mensagem
-    mensagens.push({ nome, email, mensagem, data: new Date() });
-
-    fs.writeFileSync(dbPath, JSON.stringify(mensagens, null, 2));
-
-    res.json({ success: 'Mensagem enviada com sucesso!' });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
-// Endpoint para listar mensagens (apenas para teste)
-app.get('/mensagens', (req, res) => {
-    const dbPath = path.join(__dirname, 'db.json');
-    if (!fs.existsSync(dbPath)) return res.json([]);
-    const mensagens = JSON.parse(fs.readFileSync(dbPath));
-    res.json(mensagens);
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+// Start do servidor
+(async () => {
+  try {
+    await connectDB();
+    // sincroniza as tabelas (use { alter: true } ou migrations em produção)
+    await sequelize.sync();
+    app.listen(PORT, () => console.log(`🚀 Backend rodando: http://localhost:${PORT}`));
+  } catch (err) {
+    console.error("Erro ao iniciar servidor:", err);
+  }
+})();
