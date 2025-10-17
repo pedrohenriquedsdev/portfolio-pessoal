@@ -1,0 +1,14 @@
+# Node
+node_modules/
+npm-debug.log
+
+# React / Vite
+dist/
+.vite/
+.env.local
+.env.development
+.env.production
+
+# Sistema
+.DS_Store
+Thumbs.db

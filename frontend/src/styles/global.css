@@ -69,7 +69,7 @@ section {
     height: 100vh;
     display: flex;
     align-items: center;
-    background: url('Image/bg.jpg') center/cover no-repeat fixed;
+    background: url('/assets/bg.jpg') center/cover no-repeat fixed;
 }
 
 .main .content h2 {
