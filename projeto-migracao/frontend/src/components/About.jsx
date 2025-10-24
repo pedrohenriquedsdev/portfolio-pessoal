@@ -7,12 +7,12 @@ export default function About() {
       <div className="content">
         <div className="col-left">
           <p className="paragraph-text">
-            Olá! Eu sou Pedro, desenvolvedor backend. Amo criar projetos web modernos e eficientes.
+            Olá! Eu sou Pedro, desenvolvedor backend. Iniciando a trajetória com backend JS.
           </p>
         </div>
         <div className="col-right">
           <div className="img-card">
-            <img src="/bg.jpg" alt="Sobre" />
+            <img src="/minhafoto.jpg" alt="Sobre" />
           </div>
         </div>
       </div>
